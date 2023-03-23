@@ -16,8 +16,9 @@
 
 .app-content-container {
   display: flex;
-  flex-direction: column;
-  flex-grow: 1;
+  width: 100vw;
+  /* flex-direction: column; */
+  /* flex-grow: 1; */
 
 }
 
@@ -27,15 +28,26 @@
   border: 1px solid lightgrey;
   padding: 4px;
   flex-direction: column;
+  width:50vw;
 }
 
 .app-output-container {
   display: flex;
   flex-grow: 1;
   border: 1px solid lightgrey;
-  padding: 4px;
+  padding: 10px 50px;
+  width:50vw;
+  flex-direction: column;
+  text-align: left;
 }
-
+.app-output-header-text{
+    margin-bottom: 30px;
+}
 .app-title {
   font-size: 1.6rem;
+  font-weight: 600;
+}
+.convertToTextButton{
+  text-transform: initial;
+  background: #00612b;
 }
