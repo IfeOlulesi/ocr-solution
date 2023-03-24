@@ -2,6 +2,8 @@ import { useState, } from 'react';
 import {
   AppBar,
   Box,
+  Button,
+  Checkbox,
   Container,
   CssBaseline,
   Divider,
@@ -9,8 +11,16 @@ import {
   FormControlLabel,
   FormLabel,
   Grid,
-  Radio,
-  RadioGroup,
+  InputLabel,
+  MenuItem,
+  Paper,
+  Select,
+  TableContainer,
+  Table,
+  TableCell,
+  TableBody,
+  TableHead,
+  TableRow,
   TextField,
   Toolbar,
   Typography,
@@ -20,8 +30,146 @@ import {
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DemoContainer, DemoItem } from '@mui/x-date-pickers/internals/demo';
 
 import './styles/App.css';
+
+
+
+
+function convertCamelCaseToTitleCase(str) {
+  console.log(str)
+  return str.replace(/([a-z])([A-Z])/g, '$1 $2')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+const MyFormHeader = ({ form }) => {
+  return (
+    <Grid item xs={12} key={form.name}>
+      <Typography variant="h5" sx={{ paddingTop: "1rem" }} >{form.name}</Typography>
+      <Typography variant="body2" sx={{ paddingBottom: "1rem" }}>{form.desc}</Typography>
+      <Divider />
+    </Grid>
+  )
+}
+
+const MyTextField = ({ form }) => {
+  return (
+    <Grid item xs={form.xs} key={form.name}>
+      <TextField
+        label={form.name}
+        value={form.value}
+        onChange={(event) => form.setValue(event.target.value)}
+        onBlur={form.validator}
+        variant="outlined"
+        // size="small"
+        fullWidth
+        required={form.required}
+      />
+    </Grid>
+  )
+}
+
+const MySelect = ({ form }) => {
+  return (
+    <Grid item xs={form.xs} key={form.name}>
+      <FormControl fullWidth required={form.required}>
+        <InputLabel label={`${form.name}-label`}>{form.name}</InputLabel>
+        <Select
+          labelId={`${form.name}-label`}
+          id={`${form.name}`}
+          value={form.value}
+          label={form.name}
+          onChange={(event) => form.setValue(event.target.value)}
+        >
+          {form.options.map(option => (
+            <MenuItem value={option.value}>{option.label}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Grid>
+  )
+}
+
+const MyDatePicker = ({ form }) => {
+  return (
+    <Grid item xs={form.xs} key={form.name}>
+      <LocalizationProvider dateAdapter={AdapterMoment}>
+        <DatePicker label="Basic date picker" />
+      </LocalizationProvider>
+    </Grid>
+  )
+}
+
+function isAlphabetic(str) {
+  return /^[a-zA-Z\s]+$/.test(str);
+}
+
+const MyTable = ({ form }) => {
+  return (
+    <Grid item xs={form.xs} key={form.name} sx={{ display: "flex", justifyContent: "center", flexDirection: "row" }}>
+      <TableContainer component={Paper} sx={{ maxWidth: 650, border: "1px solid lightgrey" }}>
+        <Table aria-label="simple table" size="small" >
+          <TableHead>
+            {form?.tableSection &&
+              <TableRow>
+                <TableCell align="center" sx={{ fontWeight: "bolder" }} colSpan={5}> {form?.tableSection} </TableCell>
+              </TableRow>
+            }
+            <TableRow>
+              {form.columnHeaders.map(column => {
+                return (
+                  <TableCell sx={{ fontWeight: "bolder" }}>{column}</TableCell>
+                )
+              })}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {form.rows.map((row) => (
+              <TableRow
+                hover
+                key={row.label}
+                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              >
+                {Array.isArray(row) ?
+                  row.map(cell => (
+                    <TableCell>
+                      {cell}
+                      {
+                        !isAlphabetic(cell) &&
+                        <Checkbox />
+                      }
+                    </TableCell>
+                  )
+                  ) :
+                  <>
+                    <TableCell component="th" scope="row"> {row.count} </TableCell>
+                    <TableCell> {row.label} </TableCell>
+                    {row?.type === 'textfield' &&
+                      <TableCell>
+                        <TextField
+                          placeholder="Ex: 2,3..."
+                          value={row.value}
+                          onChange={(event) => row.setValue(event.target.value)}
+                          onBlur={row.validator}
+                          variant="outlined"
+                          size="small"
+                          type="number"
+                          fullWidth
+                        />
+                      </TableCell>}
+                  </>
+                }
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Grid>
+  )
+}
 
 
 const FormSection = () => {
@@ -69,41 +217,100 @@ const FormSection = () => {
     signatureOfCM: "",
     signatureOfRegOfficer: "",
 
-    // personalStatistics: {
-    // trouserSize: {
-    // length: "",
-    // waist: "",
-    // bottom: "",
-    // },
-    // topSize: {
-    // length: "",
-    // chest: "",
-    // neck: "",
-    // },
-    // },
-    // kitsSupplied: {
-    //   khakiShirtAndTrouser: "",
-    //   whiteCanvas: "",
-    //   plainVest: "",
-    //   NYSCCrestedVest: "",
-    //   belt: "",
-    //   paitOfJungleBoots: "",
-    //   pairOfPTShorts: "",
-    //   youthCorpsCap: "",
-    //   pairOfSocks: "",
-    // },
-    // posting: {
-    //   jobExperience: "",
-    //   typeOfPrimaryAssignment: "",
-    //   institution: "",
-    //   lga: "",
-    //   town: "",
-    //   primAssignmentResidentialAddress: "",
-    //   email: "",
-    // }
+    personalStatistics: {
+      trouserSize: {
+        length: "",
+        waist: "",
+        bottom: "",
+      },
+      topSize: {
+        length: "",
+        chest: "",
+        neck: "",
+      },
+    },
+
+    kitsSupplied: {
+      khakiShirtAndTrouser: "",
+      whiteCanvas: "",
+      plainVest: "",
+      crestedVest: "",
+      belt: "",
+      pairOfJungleBoots: "",
+      pairOfPtShorts: "",
+      youthCorpsCap: "",
+      pairOfSocks: "",
+    },
+
+
+    posting: {
+      jobExperience: "",
+      typeOfPrimaryAssignment: "",
+      institution: "",
+      lga: "",
+      town: "",
+      primAssignmentResidentialAddress: "",
+      email: "",
+    }
   })
 
+
+  /**
+   * 
+   * @returns [{label, textFieldProps: {name, value, onChange, }}]
+   */
+  const gen = () => {
+    /*
+    input: formValues.something
+    output: [{label, textFieldProps: {name, value, onChange, }}]
+
+    */
+
+    let source = Object.keys(formValues.kitsSupplied)
+    let output = []
+    let count = 1
+    source.map(kitPart => {
+
+      const model = {
+        label: convertCamelCaseToTitleCase(kitPart),
+        count,
+        type: "textfield",
+        textFieldProps: {
+          name: convertCamelCaseToTitleCase(kitPart),
+          value: formValues.kitsSupplied[kitPart],
+          setValue: newValue => {
+            let newObj = { ...formValues }
+            newObj.kitsSupplied[`${kitPart}`] = newValue
+            setFormValues(newObj)
+          },
+          validator: () => console.log(`validating ${kitPart}`),
+        }
+      }
+      output.push(model)
+      count += 1
+    })
+
+    return output
+  }
+
+  const createTrouserData = () => {
+    return [
+      ["LENGTH", `36" - 48"`, `35" - 46"`, `32" - 33"`, `30" - 32"`],
+      ['WAIST', `40" - 42"`, `48" - 40"`, `36" - 38"`, `32" - 35"`],
+      ['BOTTOM', `16" - 17"`, `15" - 16"`, `14" - 15"`, `12" - 14"`],
+    ]
+  }
+
+  const createTopData = () => {
+    return [
+      ['LENGTH', `36" - 48"`, `35" - 46"`, `32" - 33"`, `30" - 32"`],
+      ['CHEST', `40" - 42"`, `48" - 40"`, `36" - 38"`, `32" - 35"`],
+      ['NECK', `16" - 17"`, `15" - 16"`, `14" - 15"`, `12" - 14"`],
+    ]
+  }
+
   const formFields = [
+    // demographics
     {
       name: "Demographics",
       type: "section-header",
@@ -168,22 +375,44 @@ const FormSection = () => {
     },
     {
       name: "SEX",
-      type: "radio",
+      type: "select",
       value: formValues.sex,
       setValue: (newValue) => setFormValues({ ...formValues, sex: newValue }),
       validator: () => console.log("Validating sex"),
       required: true,
-      options: ['male', 'female'],
+      options: [{ label: 'male', value: 'male' }, { label: 'female', value: 'female' }],
       xs: 4,
     },
     {
       name: "MARITAL STATUS",
-      type: "radio",
+      type: "select",
       value: formValues.maritalStatus,
       setValue: (newValue) => setFormValues({ ...formValues, maritalStatus: newValue }),
       validator: () => console.log("Validating marital status"),
       required: true,
-      options: ['married', 'single', 'divorced', 'separated', 'widowed'],
+      options:
+        [
+          {
+            label: 'married',
+            value: 'married',
+          },
+          {
+            label: 'single',
+            value: 'single',
+          },
+          {
+            label: 'divorced',
+            value: 'divorced',
+          },
+          {
+            label: 'separated',
+            value: 'separated',
+          },
+          {
+            label: 'widowed',
+            value: 'widowed',
+          },
+        ],
       xs: 4,
     },
     {
@@ -258,7 +487,7 @@ const FormSection = () => {
       required: true,
       xs: 4,
     },
-    ///////////////////////////////////////////////////////////
+    // Section 2
     {
       name: "Section 2",
       type: "section-header",
@@ -327,7 +556,7 @@ const FormSection = () => {
       required: true,
       xs: 4,
     },
-    //////////////////////////////////////
+    // Next of Kin Information
     {
       name: "Next of Kin Information",
       type: "section-header",
@@ -369,7 +598,7 @@ const FormSection = () => {
       required: true,
       xs: 4,
     },
-    ////////////////////////////////
+    // ICE information
     {
       name: "In Case of Emergency",
       type: "section-header",
@@ -412,7 +641,7 @@ const FormSection = () => {
       xs: 4,
     },
 
-    ///////////////////////////////
+    // Parent Information
 
     {
       name: "NAME OF PARENT",
@@ -481,8 +710,139 @@ const FormSection = () => {
       name: "SIGNATURE OF REGISTRATION OFFICER",
       type: "text",
       value: formValues.signatureOfRegOfficer,
+      setValue: (newValue) => setFormValues({ ...formValues, signatureOfRegOfficer: newValue }),
+      validator: () => console.log("Validating signature of registration officer"),
+      required: true,
+      xs: 4,
+    },
+    {
+      name: "SIGNATURE OF REGISTRATION OFFICER",
+      type: "text",
+      value: formValues.signatureOfRegOfficer,
       setValue: (newValue) => setFormValues({ ...formValues, nameOfParent: newValue }),
       validator: () => console.log("Validating parent name"),
+      required: true,
+      xs: 4,
+    },
+    // PERSONAL STATISTICS
+    {
+      name: "Personal Statistics",
+      type: "section-header",
+      desc: "Information about your top and trouser length"
+    },
+    {
+      name: "Trouser",
+      type: "table",
+      columnHeaders: ["SIZE", "EXTRA LARGE", "LARGE", "MEDIUM", "SMALL"],
+      rowHeaders: ['SIZE', 'LENGTH', 'WAIST', 'BOTTOM'],
+      tableSection: "Trouser Measurement",
+      rows: createTrouserData(),
+      xs: 12,
+    },
+    {
+      name: "Top",
+      type: "table",
+      columnHeaders: ["SIZE", "EXTRA LARGE", "LARGE", "MEDIUM", "SMALL"],
+      rowHeaders: ['SIZE', 'LENGTH', 'CHEST', 'NECK'],
+      tableSection: "Top Measurement",
+      rows: createTopData(),
+      xs: 12,
+    },
+    // kits supplied
+    {
+      name: "Kits Supplied",
+      type: "section-header",
+      desc: ""
+    },
+    {
+      type: "table",
+      name: "Kit Information",
+      columnHeaders: ["S/N", "KIT", "QUANTITY"],
+      rowHeaders: [],
+      rows: gen(),
+      xs: 12,
+    },
+    // POSTING
+    {
+      name: "Posting",
+      type: "section-header",
+      desc: "",
+    },
+    {
+      name: convertCamelCaseToTitleCase("jobExperience"),
+      type: "text",
+      value: formValues.posting.jobExperience,
+      setValue: newValue => {
+        let newObj = { ...formValues }
+        newObj.posting.jobExperience = newValue
+        setFormValues(newObj)
+      },
+      validator: () => console.log("Validating jobExperience"),
+      required: true,
+      xs: 4,
+    },
+    {
+      name: convertCamelCaseToTitleCase("typeOfPrimaryAssignment"),
+      type: "text",
+      value: formValues.posting.typeOfPrimaryAssignment,
+      setValue: newValue => {
+        let newObj = { ...formValues }
+        newObj.posting.typeOfPrimaryAssignment = newValue
+        setFormValues(newObj)
+      },
+      validator: () => console.log("Validating typeOfPrimaryAssignment"),
+      required: true,
+      xs: 4,
+    },
+    {
+      name: convertCamelCaseToTitleCase("institution"),
+      type: "text",
+      value: formValues.posting.institution,
+      setValue: newValue => {
+        let newObj = { ...formValues }
+        newObj.posting.institution = newValue
+        setFormValues(newObj)
+      },
+      validator: () => console.log("Validating institution"),
+      required: true,
+      xs: 4,
+    },
+    {
+      name: convertCamelCaseToTitleCase("lga"),
+      type: "text",
+      value: formValues.posting.lga,
+      setValue: newValue => {
+        let newObj = { ...formValues }
+        newObj.posting.lga = newValue
+        setFormValues(newObj)
+      },
+      validator: () => console.log("Validating lga"),
+      required: true,
+      xs: 4,
+    },
+    {
+      name: convertCamelCaseToTitleCase("town"),
+      type: "text",
+      value: formValues.posting.town,
+      setValue: newValue => {
+        let newObj = { ...formValues }
+        newObj.posting.town = newValue
+        setFormValues(newObj)
+      },
+      validator: () => console.log("Validating town"),
+      required: true,
+      xs: 4,
+    },
+    {
+      name: convertCamelCaseToTitleCase("primAssignmentResidentialAddress"),
+      type: "text",
+      value: formValues.posting.primAssignmentResidentialAddress,
+      setValue: newValue => {
+        let newObj = { ...formValues }
+        newObj.posting.primAssignmentResidentialAddress = newValue
+        setFormValues(newObj)
+      },
+      validator: () => console.log("Validating primAssignmentResidentialAddress"),
       required: true,
       xs: 4,
     },
@@ -493,60 +853,21 @@ const FormSection = () => {
       <Container maxWidth="md">
         <Grid container spacing={3}>
           {formFields.map(form =>
-            form.type === "text" ?
+            form.type === "text" ? <MyTextField form={form} />
 
-              <Grid item xs={form.xs}>
-                <TextField
-                  label={form.name}
-                  value={form.value}
-                  onChange={(event) => form.setValue(event.target.value)}
-                  onBlur={form.validator}
-                  variant="outlined"
-                  // size="small"
-                  fullWidth
-                  required={form.required}
-                />
-              </Grid> : form.type === "radio" ?
+              : form.type === "select" ? <MySelect form={form} />
 
-                <Grid item xs={form.xs}>
-                  <FormControl required={form.required}>
-                    <FormLabel>{form.name}</FormLabel>
-                    <RadioGroup
-                      name={`${form.name}`}
-                      value={form.value}
-                      onChange={(event) => form.setValue(event.target.value)}
-                    >
-                      {
-                        form.options.map(option => {
-                          return (
-                            <FormControlLabel
-                              value={option}
-                              label={option}
-                              control={<Radio />}
-                            />
-                          )
-                        })
-                      }
-                    </RadioGroup>
-                  </FormControl>
-                </Grid> : form.type === "date" ?
+                : form.type === "date" ? <MyDatePicker form={form} />
 
-                  <Grid item xs={form.xs}>
-                    <LocalizationProvider dateAdapter={AdapterMoment}>
-                      {/* <DemoContainer components={['DatePicker']}> */}
-                        <DatePicker label="Basic date picker" />
-                      {/* </DemoContainer> */}
-                    </LocalizationProvider>
-                  </Grid> :
+                  : form.type === "table" ? <MyTable form={form} />
 
-                  <Grid item xs={12}>
-                    <Typography variant="h5" sx={{paddingTop: "1rem"}} >{form.name}</Typography>
-                    <Typography variant="body2" sx={{ paddingBottom: "1rem" }}>{form.desc}</Typography>
-                    <Divider />
-                  </Grid>
-            // {
+                    : <MyFormHeader form={form} />
 
           )}
+
+          <Grid item xs={12} sx={{marginTop: "16px"}}>
+            <Button fullWidth variant='contained' >Submit</Button>
+          </Grid>
         </Grid>
 
       </Container>
